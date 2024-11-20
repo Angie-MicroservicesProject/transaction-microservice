@@ -16,7 +16,7 @@ Microservicio de Transacciones
 
     Local : spring.data.mongodb.uri=mongodb://localhost:27017
   
-    Mongo Atlas: #spring.data.mongodb.uri=mongodb+srv://<USUARIO>:<CONTRASEÑA>@cluster0.kc9nmdx.mongodb.net/
+    Mongo Atlas: spring.data.mongodb.uri=mongodb+srv://"USUARIO":"CONTRASEÑA"@cluster0.kc9nmdx.mongodb.net/
 
 
 6. Correr el main con Shift+F10
