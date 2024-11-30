@@ -17,7 +17,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
 
-
     @Override
     public Mono<Transaction> getTransaction(String id) {
         return transactionRepository.findById(id);
@@ -28,7 +27,6 @@ public class TransactionServiceImpl implements TransactionService {
     public Mono<Void> deleteTransaction(String id) {
         return transactionRepository.deleteById(id);
     }
-
 
     @Override
     public Mono<Transaction> registerDeposit(String cuentaOrigenId, BigDecimal monto) {
@@ -45,10 +43,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
 
         return transactionRepository.save(transaction);
-
-
     };
-
 
     @Override
     public Mono<Transaction> registerWithdrawal(String cuentaOrigenId, BigDecimal monto) {

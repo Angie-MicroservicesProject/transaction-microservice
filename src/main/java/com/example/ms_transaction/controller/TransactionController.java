@@ -2,8 +2,10 @@ package com.example.ms_transaction.controller;
 
 
 import com.example.ms_transaction.model.Transaction;
+import com.example.ms_transaction.repository.TransactionRepository;
 import com.example.ms_transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,6 +19,15 @@ import java.util.Map;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final TransactionRepository transactionRepository;
+
+
+    @Autowired
+    public TransactionController(TransactionRepository transactionRepository, TransactionService transactionService){
+        this.transactionRepository=transactionRepository;
+        this.transactionService=transactionService;
+    }
+
 
 
     @GetMapping("/transacciones/{id}")
