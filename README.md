@@ -22,3 +22,7 @@ Microservicio de Transacciones
 6. Correr el main con Shift+F10
 
     Aplicación lista para realizar pruebas en `POSTMAN`
+
+7. Para visualizar las pruebas unitarias en la carpeta src>test
+
+8. Para ver el informe de jacoco ejecutar el comando mvn clean test y en la carpeta target>site>jacoco-resources>index.html dar click derecho y "Open in" seleccionamos "Explorer"
