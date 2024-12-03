@@ -1,6 +1,7 @@
 package com.example.ms_transaction.service.impl;
 
 import com.example.ms_transaction.model.Transaction;
+import com.example.ms_transaction.model.TransactionNotifier;
 import com.example.ms_transaction.repository.TransactionRepository;
 import com.example.ms_transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
 
-
     @Override
     public Mono<Transaction> getTransaction(String id) {
         return transactionRepository.findById(id);
@@ -29,25 +29,48 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.deleteById(id);
     }
 
+//    @Override
+//    public Mono<Transaction> registerDeposit(String cuentaOrigenId, BigDecimal monto) {
+//
+//        if (cuentaOrigenId == null || monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
+//            return Mono.error(new IllegalArgumentException("Cuenta origen y monto deben ser válidos"));
+//        }
+//
+//        Transaction transaction = Transaction.builder()
+//                .cuentaOrigenId(cuentaOrigenId)
+//                .tipo(Transaction.TransactionType.DEPOSITO)
+//                .monto(monto)
+//                .fecha(LocalDateTime.now())
+//                .build();
+//
+//        return transactionRepository.save(transaction);
+//    };
+
+    private final TransactionNotifier transactionNotifier = new TransactionNotifier();
 
     @Override
     public Mono<Transaction> registerDeposit(String cuentaOrigenId, BigDecimal monto) {
+        return transactionRepository.save(createDepositTransaction(cuentaOrigenId, monto))
+                .doOnSuccess(transaction -> transactionNotifier.notifyObservers(transaction));
+    }
 
-        if (cuentaOrigenId == null || monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
-            return Mono.error(new IllegalArgumentException("Cuenta origen y monto deben ser válidos"));
+    private Transaction createDepositTransaction(String cuentaOrigenId, BigDecimal monto) {
+        if (cuentaOrigenId == null || cuentaOrigenId.isEmpty()) {
+            throw new IllegalArgumentException("El ID de la cuenta origen no puede ser nulo o vacío.");
         }
 
-        Transaction transaction = Transaction.builder()
+        if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor a cero.");
+        }
+
+        return Transaction.builder()
                 .cuentaOrigenId(cuentaOrigenId)
-                .tipo(Transaction.TransactionType.DEPOSITO)
                 .monto(monto)
+                .tipo(Transaction.TransactionType.DEPOSITO)
                 .fecha(LocalDateTime.now())
                 .build();
+    }
 
-        return transactionRepository.save(transaction);
-
-
-    };
 
 
     @Override
@@ -102,6 +125,9 @@ public class TransactionServiceImpl implements TransactionService {
                     return transactionRepository.save(transaction);
                 });
     }
+
+
+
 
     @Override
     public Flux<Transaction> getTransactionHistory() {

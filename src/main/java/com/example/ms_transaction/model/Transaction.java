@@ -1,12 +1,9 @@
 
 package com.example.ms_transaction.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +12,10 @@ import java.time.LocalDateTime;
     @Setter
     @Builder
     @Document
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    @ToString
     public class Transaction {
 
         @BsonId
