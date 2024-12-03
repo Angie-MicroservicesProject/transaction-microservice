@@ -100,6 +100,7 @@
 			<version>2.0.1.Final</version>
 		</dependency>
 
+
 		<dependency>
 			<groupId>org.openapitools</groupId>
 			<artifactId>openapi-generator-maven-plugin</artifactId>
@@ -239,6 +240,36 @@
 				</configuration>
 
 			</plugin>
+
+
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>5.1.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/src/main/resources/api.yml</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>com.example.ms_transaction.api</apiPackage>
+							<modelPackage>com.example.ms_transaction.model</modelPackage>
+							<supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+							<configOptions>
+								<delegatePattern>true</delegatePattern>
+							</configOptions>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+
+
+
+
 
 
 		</plugins>
