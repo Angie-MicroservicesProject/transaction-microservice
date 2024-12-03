@@ -29,7 +29,6 @@ public class TransactionController {
     }
 
 
-
     @GetMapping("/transacciones/{id}")
     public Mono<Transaction> viewCustomer(@RequestHeader Map<String, String> headers, @PathVariable String id) {
         return transactionService.getTransaction(id)

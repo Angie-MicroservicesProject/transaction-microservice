@@ -5,7 +5,7 @@ import com.example.ms_transaction.controller.TransactionController;
 import com.example.ms_transaction.model.Transaction;
 import com.example.ms_transaction.repository.TransactionRepository;
 import com.example.ms_transaction.service.TransactionService;
-import com.example.ms_transaction.service.impl.TransactionServiceImpl;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import static org.junit.Assert.assertThrows;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -90,6 +90,8 @@ class MsTransactionApplicationTests {
 				.contains(transaction1, transaction2);
 	}
 
+
+
 	@Test
 	void viewCustomer() {
 		Transaction transaction = new Transaction("1", Transaction.TransactionType.DEPOSITO, BigDecimal.valueOf(100), LocalDateTime.now(), "123", null);
@@ -103,8 +105,39 @@ class MsTransactionApplicationTests {
 				.isEqualTo(transaction);
 	}
 
+	@Test
+	void registerWithdrawal() {
+
+		Transaction transaction = new Transaction(
+				"3",
+				Transaction.TransactionType.RETIRO,
+				BigDecimal.valueOf(50),
+				LocalDateTime.now(),
+				"123",
+				null
+		);
+
+		when(transactionService.registerWithdrawal(anyString(), any(BigDecimal.class))).thenReturn(Mono.just(transaction));
 
 
+		webTestClient.post().uri("/api/transacciones/retiro")
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(Map.of("cuentaOrigenId", "123", "monto", "50"))
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(Transaction.class)
+				.isEqualTo(transaction);
+	}
+
+
+	@Test
+	void contextLoads() {
+	}
+
+	@Test
+	void mainMethodRuns() {
+		MsTransactionApplication.main(new String[] {});
+	}
 
 
 

@@ -152,5 +152,85 @@ class MsTransactionServiceTests {
 		verify(transactionRepository, times(1)).findAll();
 	}
 
+	@Test
+	void testRegisterTransferWithNullInputs() {
+		Mono<Transaction> result = transactionService.registerTransfer(null, "account2", BigDecimal.TEN);
+
+		StepVerifier.create(result)
+				.expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
+						throwable.getMessage().equals("Cuentas y monto deben ser válidos"))
+				.verify();
+	}
+
+	@Test
+	void testRegisterTransferWithInvalidAmount() {
+		Mono<Transaction> result = transactionService.registerTransfer("account1", "account2", BigDecimal.ZERO);
+
+		StepVerifier.create(result)
+				.expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
+						throwable.getMessage().equals("Cuentas y monto deben ser válidos"))
+				.verify();
+	}
+
+	@Test
+	void testRegisterTransferWithInsufficientBalance() {
+		String cuentaOrigenId = "account1";
+		String cuentaDestinoId = "account2";
+		BigDecimal monto = BigDecimal.valueOf(150);
+
+		// Simula las transacciones existentes con saldo insuficiente
+		List<Transaction> transactions = Arrays.asList(
+				new Transaction("1", Transaction.TransactionType.DEPOSITO, BigDecimal.valueOf(100), LocalDateTime.now(), cuentaOrigenId, null)
+		);
+
+		when(transactionRepository.findAllByCuentaOrigenId(cuentaOrigenId)).thenReturn(Flux.fromIterable(transactions));
+
+		Mono<Transaction> result = transactionService.registerTransfer(cuentaOrigenId, cuentaDestinoId, monto);
+
+		StepVerifier.create(result)
+				.expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
+						throwable.getMessage().equals("Saldo insuficiente para la transferencia"))
+				.verify();
+
+		verify(transactionRepository, times(1)).findAllByCuentaOrigenId(cuentaOrigenId);
+		verify(transactionRepository, never()).save(any(Transaction.class));
+	}
+
+	@Test
+	void testRegisterTransferSuccess() {
+		String cuentaOrigenId = "account1";
+		String cuentaDestinoId = "account2";
+		BigDecimal monto = BigDecimal.valueOf(50);
+
+		// Simula las transacciones existentes con saldo suficiente
+		List<Transaction> transactions = Arrays.asList(
+				new Transaction("1", Transaction.TransactionType.DEPOSITO, BigDecimal.valueOf(100), LocalDateTime.now(), cuentaOrigenId, null)
+		);
+
+		Transaction newTransaction = Transaction.builder()
+				.cuentaOrigenId(cuentaOrigenId)
+				.cuentaDestinoId(cuentaDestinoId)
+				.tipo(Transaction.TransactionType.TRANSFERENCIA)
+				.monto(monto)
+				.fecha(LocalDateTime.now())
+				.build();
+
+		when(transactionRepository.findAllByCuentaOrigenId(cuentaOrigenId)).thenReturn(Flux.fromIterable(transactions));
+		when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.just(newTransaction));
+
+		Mono<Transaction> result = transactionService.registerTransfer(cuentaOrigenId, cuentaDestinoId, monto);
+
+		StepVerifier.create(result)
+				.expectNextMatches(transaction -> transaction.getCuentaOrigenId().equals(cuentaOrigenId) &&
+						transaction.getCuentaDestinoId().equals(cuentaDestinoId) &&
+						transaction.getMonto().equals(monto) &&
+						transaction.getTipo() == Transaction.TransactionType.TRANSFERENCIA)
+				.verifyComplete();
+
+		verify(transactionRepository, times(1)).findAllByCuentaOrigenId(cuentaOrigenId);
+		verify(transactionRepository, times(1)).save(any(Transaction.class));
+	}
+
+
 
 }
